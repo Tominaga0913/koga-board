@@ -6,6 +6,11 @@ SWITCH_SECONDS = 6
 # 発車時刻・残り時間を計算し直す間隔(秒)。発車したバスはこの間隔で一覧から消える
 REFRESH_SECONDS = 15
 
+# お知らせを書く Google スプレッドシートの「ウェブに公開」した CSV の URL。
+# 列は「場所 / お知らせ / 表示開始 / 表示終了」。空なら docs/notices.txt だけを使う。
+NOTICES_CSV_URL = ("https://docs.google.com/spreadsheets/d/e/2PACX-1vQItsOSTgP1brgABVPuwHZQjiBy3YMOAloMcljw5fCzxisfY6kk"
+                   "-g_VTPPZiaW2iY1N16POiwYuyjcn/pub?gid=0&single=true&output=csv")
+
 # 青柳・コスモス館・古賀駅(コガバス + 西鉄バスの切り替え表示)
 # stop          : コガバスのバス停名(GTFSの stop_name と同じ文字)
 # routes        : 表示するコガバスの路線名

@@ -12,7 +12,7 @@ import json
 from datetime import date, timedelta
 from pathlib import Path
 
-from config import SITES, SWITCH_SECONDS, YATABI
+from config import NOTICES_CSV_URL, SITES, SWITCH_SECONDS, YATABI
 from departures import is_running, load_feed, stop_ids_by_name
 from timetable import find_csv, load_buses, load_holidays, load_trains
 
@@ -128,7 +128,7 @@ def main():
         (DATA / f"{name}.json").write_text(
             json.dumps(site_days(feed, site, first, last), ensure_ascii=False, separators=(",", ":")),
             encoding="utf-8")
-        conf = {"kind": "koga", "data": f"data/{name}.json", "stop": site["stop"], "area": AREAS[name],
+        conf = {"kind": "koga", "data": f"data/{name}.json", "stop": site["stop"], "area": AREAS[name], "noticesCsv": NOTICES_CSV_URL,
                 "template": site["nnr_template"], "nnr": site["nishitetsu_url"], "sec": SWITCH_SECONDS}
         title = f'{site["place"]} 発車案内'
         (DOCS / f"{name}.html").write_text(page_html(name, title, conf), encoding="utf-8")
@@ -136,7 +136,7 @@ def main():
 
     (DATA / "yatabi.json").write_text(
         json.dumps(yatabi_data(), ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
-    conf = {"kind": "yatabi", "data": "data/yatabi.json", "stop": YATABI["stop"], "area": AREAS["yatabi"],
+    conf = {"kind": "yatabi", "data": "data/yatabi.json", "stop": YATABI["stop"], "area": AREAS["yatabi"], "noticesCsv": NOTICES_CSV_URL,
             "transfer": YATABI["transfer_minutes"], "directions": YATABI["directions"],
             "labels": YATABI.get("direction_labels", {})}
     (DOCS / "yatabi.html").write_text(

@@ -42,26 +42,69 @@
     return (t.getUTCMonth() + 1) + "月" + t.getUTCDate() + "日(" + "日月火水木金土"[t.getUTCDay()] + ")";
   };
 
-  // ---------- お知らせ(docs/notices.txt) ----------
-  // 1行に1つ。「全部: 文章」「青柳: 文章」のように、先頭で出す場所を選ぶ。# で始まる行は説明。
+  // ---------- お知らせ ----------
+  // 2か所から読む(どちらか片方だけでもよい):
+  //  ・Google スプレッドシート(C.noticesCsv): 列「場所 / お知らせ / 表示開始 / 表示終了」。
+  //    表示開始・終了が空なら、いつでも出す。日付の範囲外の行は出さない(期限が来たら自動で消える)。
+  //  ・docs/notices.txt: 1行に「場所: 文章」。# で始まる行は説明。
+  // 場所は 全部 / 米多比 / 青柳 / コスモス館 / 古賀駅(「青柳、コスモス館」のように複数も可)。
   let notices = [];
+  const forHere = (place) => {
+    const areas = String(place).split(/[,、・\s]+/).filter(Boolean);
+    return areas.includes("全部") || areas.includes(C.area);
+  };
+  // "2026/11/20" "2026-11-20" "2026年11月20日" などを "2026-11-20" に(時刻が付いていても日付だけ見る)
+  const normDate = (s) => {
+    const m = String(s || "").match(/(\d{4})\D+(\d{1,2})\D+(\d{1,2})/);
+    return m ? m[1] + "-" + m[2].padStart(2, "0") + "-" + m[3].padStart(2, "0") : "";
+  };
+  // CSV を行×列の配列に(「"」で囲んだ中のカンマや改行もそのまま扱う)
+  const parseCsv = (text) => {
+    const rows = []; let row = [], cell = "", q = false;
+    for (let i = 0; i < text.length; i++) {
+      const c = text[i];
+      if (q) {
+        if (c === '"' && text[i + 1] === '"') { cell += '"'; i++; }
+        else if (c === '"') q = false;
+        else cell += c;
+      } else if (c === '"') q = true;
+      else if (c === ",") { row.push(cell); cell = ""; }
+      else if (c === "\n" || c === "\r") {
+        if (c === "\r" && text[i + 1] === "\n") i++;
+        row.push(cell); rows.push(row); row = []; cell = "";
+      } else cell += c;
+    }
+    if (cell || row.length) { row.push(cell); rows.push(row); }
+    return rows;
+  };
+  const fromSheet = (text) => {
+    const today = jstNow().date, list = [];
+    parseCsv(text).slice(1).forEach(([place, msg, from, to]) => {   // 1行目は見出し
+      if (!msg || !msg.trim() || !forHere(place || "")) return;
+      const f = normDate(from), t = normDate(to);
+      if ((f && today < f) || (t && today > t)) return;
+      list.push(msg.trim());
+    });
+    return list;
+  };
+  const fromText = (text) => {
+    const list = [];
+    text.split(/\r?\n/).forEach((line) => {
+      line = line.trim();
+      if (!line || line.startsWith("#")) return;
+      const m = line.match(/^([^:：]+)[:：]\s*(.+)$/);
+      if (m && forHere(m[1])) list.push(m[2]);
+    });
+    return list;
+  };
+  const get = (url, parse) => fetch(url + (url.includes("?") ? "&" : "?") + "t=" + Date.now(), { cache: "no-store" })
+    .then((r) => (r.ok ? r.text() : Promise.reject(r.status))).then(parse);
+  let sheetList = [], textList = [];
   function loadNotices() {
-    fetch("notices.txt?t=" + Date.now(), { cache: "no-store" })
-      .then((r) => (r.ok ? r.text() : ""))
-      .then((text) => {
-        const list = [];
-        text.split(/\r?\n/).forEach((line) => {
-          line = line.trim();
-          if (!line || line.startsWith("#")) return;
-          const m = line.match(/^([^:：]+)[:：]\s*(.+)$/);
-          if (!m) return;
-          const areas = m[1].split(/[,、・\s]+/).filter(Boolean);
-          if (areas.includes("全部") || areas.includes(C.area)) list.push(m[2]);
-        });
-        notices = list;
-        render();
-      })
-      .catch(() => { /* 読めなければ前のお知らせのまま */ });
+    const jobs = [get("notices.txt", fromText).then((l) => { textList = l; }).catch(() => {})];
+    // 読めなかったときは前のお知らせのまま(ネットが一瞬切れても消えない)
+    if (C.noticesCsv) jobs.push(get(C.noticesCsv, fromSheet).then((l) => { sheetList = l; }).catch(() => {}));
+    Promise.all(jobs).then(() => { notices = sheetList.concat(textList); render(); });
   }
   const noticeHtml = (extra) => {
     const items = (extra ? [extra] : []).concat(notices);
