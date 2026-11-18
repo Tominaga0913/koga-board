@@ -235,7 +235,7 @@
     }
     const ths = '<th>米多比発 発車まで</th><th>古賀駅着</th>' +
       C.directions.map((d) => "<th>JR " + esc(C.labels[d] || d) + "</th>").join("");
-    const notice = noticeHtml(data.sample ? "サンプルデータを表示中です(実際の時刻ではありません)" : "");
+    const notice = noticeHtml();
     board.innerHTML = '<div class="nnr t18 yatabi" data-w="1920"><table class="disp">' +
       '<tr><th class="header_title"><div class="text_title"><span class="brand">乗り継ぎ案内</span>' +
       esc(C.stop) + " → JR古賀駅</div>" +
