@@ -132,7 +132,7 @@ def main():
     items = "".join(f'<li><a href="{n}.html">{p}</a></li>' for n, p in links)
     (DOCS / "index.html").write_text(f"""<!doctype html>
 <html lang="ja" translate="no"><head><meta charset="utf-8"><title>コガバス発車標</title>
-<style>body{{font-family:Meiryo,sans-serif;background:#d96a00;color:#fff;padding:24px}}
+<style>body{{font-family:Meiryo,sans-serif;background:#0a7d3b;color:#fff;padding:24px}}
 a{{color:#fff;font-size:28px}} li{{margin:12px 0}}</style></head>
 <body><h1>コガバス発車標</h1><ul>{items}</ul></body></html>
 """, encoding="utf-8")

@@ -66,7 +66,7 @@ GitHub Pages に公開したURLを、ディスプレイにつないだパソコ�
 - `REFRESH_SECONDS` : 残り時間を計算し直す間隔(15秒)
 - `SITES` : 場所ごとの バス停名(`stop`)・路線(`routes`)・西鉄バスナビのURL(`nishitetsu_url`)・向き(`layout`)
 - `YATABI` : 米多比の 乗り換え分数(`transfer_minutes`)・方面の表記(`direction_labels`)
-- 色を変えるときは `board.py` の `--frame`(オレンジ)を書き換える
+- 色を変えるときは `docs/board.css` の `--frame`(今は緑)を書き換える
 
 ## プログラムを直したとき
 GitHub Desktop で Commit → Push すると、2〜3分でサーバーの4つのアプリが自動で新しくなります。

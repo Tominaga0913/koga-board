@@ -1,7 +1,7 @@
 /* コガバス発車標(GitHub Pages 版)の見た目。
    西鉄「バスナビジョン」のテンプレート(16: 縦長1列 / 18: 横長2列)と同じ並び・大きさで、
-   自分たちの画面だとわかるよう色はオレンジにしている。 */
-:root { --frame: #d96a00; --sub: #ffd54a; }
+   自分たちの画面だとわかるよう色は緑にしている(色を変えるときは --frame を書き換える)。 */
+:root { --frame: #0a7d3b; --sub: #ffd54a; }
 html, body { margin: 0; padding: 0; overflow: hidden; background: var(--frame); }
 
 .nnr, .nnr table, .nnr th, .nnr td { font-family: Helvetica, Meiryo, "MS PGothic", sans-serif; }
@@ -90,9 +90,9 @@ html, body { margin: 0; padding: 0; overflow: hidden; background: var(--frame); 
   font-family: Helvetica, Meiryo, "MS PGothic", sans-serif; }
 #sw-panel .box { background: #fff; color: #222; border-radius: 16px; padding: 32px 40px;
   max-width: 640px; text-align: center; box-shadow: 0 20px 60px rgba(0,0,0,.4); }
-#sw-panel h2 { margin: 0 0 12px; font-size: 28px; color: #d96a00; }
+#sw-panel h2 { margin: 0 0 12px; font-size: 28px; color: var(--frame); }
 #sw-panel p { margin: 8px 0; font-size: 18px; line-height: 1.6; }
 #sw-panel button { margin-top: 18px; font-size: 24px; font-weight: bold; padding: 14px 36px;
-  border: 0; border-radius: 10px; background: #d96a00; color: #fff; cursor: pointer; }
+  border: 0; border-radius: 10px; background: var(--frame); color: #fff; cursor: pointer; }
 #sw-panel button.sub { background: #888; font-size: 16px; padding: 8px 20px; margin-left: 8px; }
 #sw-panel.hidden { display: none; }
