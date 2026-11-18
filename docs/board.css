@@ -1,7 +1,7 @@
 /* コガバス発車標(GitHub Pages 版)の見た目。
    西鉄「バスナビジョン」のテンプレート(16: 縦長1列 / 18: 横長2列)と同じ並び・大きさで、
    自分たちの画面だとわかるよう色は緑にしている(色を変えるときは --frame を書き換える)。 */
-:root { --frame: #0a7d3b; --sub: #ffd54a; }
+:root { --frame: #1f9d55; --sub: #ffd54a; }
 html, body { margin: 0; padding: 0; overflow: hidden; background: var(--frame); }
 
 .nnr, .nnr table, .nnr th, .nnr td { font-family: Helvetica, Meiryo, "MS PGothic", sans-serif; }
