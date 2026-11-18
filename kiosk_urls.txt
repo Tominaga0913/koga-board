@@ -1,0 +1,6 @@
+# kiosk_*.bat が開くコガバス発車標のURL(サーバー: Streamlit Community Cloud)
+# この形「場所の名前: URL」で1行ずつ書く。urls.txt より優先される。
+米多比郵便局: https://koga-yatabi.streamlit.app/
+青柳郵便局: https://koga-aoyagi.streamlit.app/
+コスモス館: https://koga-cosmos.streamlit.app/
+JR古賀駅 自由通路: https://koga-station.streamlit.app/

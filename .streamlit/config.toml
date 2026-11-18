@@ -1,0 +1,14 @@
+# 公開時の見た目の設定(ローカルでも同じように効きます)
+
+[client]
+# 見ている人には開発者向けメニュー(Deploy ボタンなど)を出さない
+toolbarMode = "viewer"
+showSidebarNavigation = false
+
+[theme]
+# 読み込み中に白く光らないよう、最初から暗い背景にする
+base = "dark"
+backgroundColor = "#050b18"
+secondaryBackgroundColor = "#0b1630"
+primaryColor = "#ffc83d"
+textColor = "#f2f5ff"

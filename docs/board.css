@@ -1,0 +1,98 @@
+/* コガバス発車標(GitHub Pages 版)の見た目。
+   西鉄「バスナビジョン」のテンプレート(16: 縦長1列 / 18: 横長2列)と同じ並び・大きさで、
+   自分たちの画面だとわかるよう色はオレンジにしている。 */
+:root { --frame: #d96a00; --sub: #ffd54a; }
+html, body { margin: 0; padding: 0; overflow: hidden; background: var(--frame); }
+
+.nnr, .nnr table, .nnr th, .nnr td { font-family: Helvetica, Meiryo, "MS PGothic", sans-serif; }
+.nnr { background: var(--frame); color: #fff; font-weight: bold; transform-origin: top left; }
+.nnr .brand { display: inline-block; background: #fff; color: var(--frame); padding: 0 .3em; margin-right: .3em;
+  border-radius: .15em; line-height: 1.1em; }
+.nnr table { margin: 0; padding: 0; table-layout: fixed; font-weight: bold; border-collapse: collapse; }
+.nnr th, .nnr td { margin: 0; padding: 0; }
+.nnr .disp { border: 0; width: 100%; }
+.nnr .header_title { background: var(--frame); color: #fff; vertical-align: bottom; text-align: left; }
+.nnr .text_title { float: left; text-align: left; }
+.nnr .text_time { text-align: right; }
+.nnr .va_top { vertical-align: top; }
+.nnr .list { border: 0; width: 100%; }
+.nnr .list th { background: #fff; color: var(--frame); border: 4px solid var(--frame); vertical-align: middle;
+  line-height: 1em; text-align: center; }
+.nnr .list td { border: 4px solid var(--frame); vertical-align: middle; overflow: hidden; background: #000;
+  text-align: left; color: #fff; }
+.nnr .list td.bin, .nnr .list td.txtct { text-align: center; }
+.nnr .now.long { white-space: nowrap; }
+.nnr .bin { text-align: center; color: #fff; line-height: 1.05em; }
+.nnr .yki { color: #fff; line-height: 1em; display: inline-block; overflow: hidden; white-space: nowrap; }
+.nnr .kiy { color: var(--sub); line-height: 1em; display: inline-block; overflow: hidden; white-space: nowrap; }
+.nnr .jkn { color: #fff; line-height: 1em; }
+.nnr .now { color: var(--sub); line-height: 1em; }
+.nnr .txtct { text-align: center; }
+.nnr .credit { font-size: 20px; line-height: 1.4em; padding: 4px 8px; color: #fff; font-weight: normal; }
+.nnr .left { margin-right: 3px; }
+.nnr .right { margin-left: 3px; }
+.nnr .empty { padding: 40px; font-size: 48px; text-align: center; }
+
+/* テンプレート16(縦長) */
+.nnr.t16 .header_title { font-size: 34px; height: 50px; line-height: 1em; }
+.nnr.t16 .i_bin { width: 155px; font-size: 20px; }
+.nnr.t16 .i_yk { font-size: 20px; }
+.nnr.t16 .i_jkn { width: 255px; font-size: 20px; }
+.nnr.t16 .bin { font-size: 30px; }
+.nnr.t16 .yki { font-size: 50px; height: 1em; }
+.nnr.t16 .kiy { font-size: 34px; height: 1em; }
+.nnr.t16 .jkn { font-size: 60px; }
+.nnr.t16 .now { font-size: 30px; }
+.nnr.t16 .now.long { font-size: 26px; }
+.nnr.t16 .gyo { height: 119px; }
+
+/* テンプレート18(横長) */
+.nnr.t18 .disp { width: 1920px; }
+.nnr.t18 .header_title { font-size: 48px; height: 96px; line-height: 1em; padding: 6px 6px 0 6px; }
+.nnr.t18 .list th { height: 34px; font-size: 26px; }
+.nnr.t18 .i_bin { width: 190px; font-size: 26px; }
+.nnr.t18 .i_yk { font-size: 26px; }
+.nnr.t18 .i_jkn { width: 220px; font-size: 24px; }
+.nnr.t18 .bin { font-size: 36px; }
+.nnr.t18 .yki { font-size: 54px; }
+.nnr.t18 .kiy { font-size: 30px; }
+.nnr.t18 .jkn { font-size: 66px; }
+.nnr.t18 .now { font-size: 40px; }
+.nnr.t18 .now.long { font-size: 28px; }
+.nnr.t18 .gyo { height: 182px; }
+
+/* 米多比(乗り継ぎ案内) */
+.nnr.yatabi .list th { height: 64px; font-size: 40px; width: 25%; }   /* 4つの列をすべて同じ幅に */
+.nnr .op { display: inline-block; font-size: 30px; line-height: 1em; padding: 4px 8px; margin-right: 14px;
+  vertical-align: middle; border: 3px solid #fff; color: #fff; }
+.nnr .op.rapid { background: #e60012; border-color: #e60012; color: #fff; }   /* 快速は赤 */
+.nnr .op.express { background: #fff; color: var(--frame); }
+.nnr .jkn { vertical-align: middle; }
+.nnr.yatabi tr.first .gyo { height: 300px; }            /* いちばん早いバスを大きく */
+.nnr.yatabi tr.first .jkn { font-size: 100px; }
+.nnr.yatabi tr.first .now, .nnr.yatabi tr.first .now.long { font-size: 48px; }
+.nnr.yatabi tr.first .kiy { font-size: 40px; }
+.nnr.yatabi tr.first .op { font-size: 42px; padding: 6px 12px; }
+.nnr.yatabi tr.next .gyo { height: 175px; }
+.nnr.yatabi tr.next .jkn { font-size: 52px; }
+.nnr.yatabi tr.next .now, .nnr.yatabi tr.next .now.long { font-size: 28px; }
+.nnr.yatabi tr.next .kiy { font-size: 26px; }
+.nnr.yatabi tr.next .op { font-size: 24px; padding: 3px 6px; }
+.nnr .msg { width: 100%; border: 0; margin-top: 6px; }
+.nnr .msg th, .nnr .msg td { border: 2px solid #fff; color: #000; font-size: 42px; line-height: 1em;
+  height: 62px; vertical-align: middle; }
+.nnr .msg th { width: 200px; background: #FFFF99; text-align: right; padding-right: 8px; }
+.nnr .msg td { background: #FFFF33; padding-left: 12px; text-align: left; }
+
+/* 西鉄バスナビとの切り替え(案内パネル) */
+#sw-panel { position: fixed; inset: 0; z-index: 99999; display: flex; align-items: center;
+  justify-content: center; background: rgba(0,0,0,.55);
+  font-family: Helvetica, Meiryo, "MS PGothic", sans-serif; }
+#sw-panel .box { background: #fff; color: #222; border-radius: 16px; padding: 32px 40px;
+  max-width: 640px; text-align: center; box-shadow: 0 20px 60px rgba(0,0,0,.4); }
+#sw-panel h2 { margin: 0 0 12px; font-size: 28px; color: #d96a00; }
+#sw-panel p { margin: 8px 0; font-size: 18px; line-height: 1.6; }
+#sw-panel button { margin-top: 18px; font-size: 24px; font-weight: bold; padding: 14px 36px;
+  border: 0; border-radius: 10px; background: #d96a00; color: #fff; cursor: pointer; }
+#sw-panel button.sub { background: #888; font-size: 16px; padding: 8px 20px; margin-left: 8px; }
+#sw-panel.hidden { display: none; }
