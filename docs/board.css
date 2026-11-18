@@ -78,11 +78,17 @@ html, body { margin: 0; padding: 0; overflow: hidden; background: var(--frame); 
 .nnr.yatabi tr.next .now, .nnr.yatabi tr.next .now.long { font-size: 28px; }
 .nnr.yatabi tr.next .kiy { font-size: 26px; }
 .nnr.yatabi tr.next .op { font-size: 24px; padding: 3px 6px; }
+/* お知らせ(西鉄の画面のお知らせ欄と同じ黄色) */
 .nnr .msg { width: 100%; border: 0; margin-top: 6px; }
-.nnr .msg th, .nnr .msg td { border: 2px solid #fff; color: #000; font-size: 42px; line-height: 1em;
+.nnr .msg th, .nnr .msg td { border: 2px solid #fff; color: #000; font-size: 42px; line-height: 1.2em;
   height: 62px; vertical-align: middle; }
 .nnr .msg th { width: 200px; background: #FFFF99; text-align: right; padding-right: 8px; }
-.nnr .msg td { background: #FFFF33; padding-left: 12px; text-align: left; }
+.nnr .msg td { background: #FFFF33; padding: 4px 12px; text-align: left; }
+.nnr.t16 .msg th, .nnr.t16 .msg td { font-size: 32px; height: 52px; }
+.nnr.t16 .msg th { width: 160px; }
+
+/* その日のバスが終わったときの案内 */
+.nnr tr.endmsg .kiy { height: auto; white-space: normal; }
 
 /* 西鉄バスナビとの切り替え(案内パネル) */
 #sw-panel { position: fixed; inset: 0; z-index: 99999; display: flex; align-items: center;

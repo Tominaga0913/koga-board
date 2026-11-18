@@ -35,8 +35,62 @@
     return mm ? "あと" + h + "時間" + mm + "分" : "あと" + h + "時間";
   };
   const nowSpan = (m) => '<span class="now' + (m >= 60 ? " long" : "") + '">' + leftText(m) + "</span>";
+  // 「明日」または「11月24日(月)」
+  const dayLabel = (iso, today) => {
+    if (iso === addDays(today, 1)) return "明日";
+    const t = new Date(iso + "T00:00:00Z");
+    return (t.getUTCMonth() + 1) + "月" + t.getUTCDate() + "日(" + "日月火水木金土"[t.getUTCDay()] + ")";
+  };
+
+  // ---------- お知らせ(docs/notices.txt) ----------
+  // 1行に1つ。「全部: 文章」「青柳: 文章」のように、先頭で出す場所を選ぶ。# で始まる行は説明。
+  let notices = [];
+  function loadNotices() {
+    fetch("notices.txt?t=" + Date.now(), { cache: "no-store" })
+      .then((r) => (r.ok ? r.text() : ""))
+      .then((text) => {
+        const list = [];
+        text.split(/\r?\n/).forEach((line) => {
+          line = line.trim();
+          if (!line || line.startsWith("#")) return;
+          const m = line.match(/^([^:：]+)[:：]\s*(.+)$/);
+          if (!m) return;
+          const areas = m[1].split(/[,、・\s]+/).filter(Boolean);
+          if (areas.includes("全部") || areas.includes(C.area)) list.push(m[2]);
+        });
+        notices = list;
+        render();
+      })
+      .catch(() => { /* 読めなければ前のお知らせのまま */ });
+  }
+  const noticeHtml = (extra) => {
+    const items = (extra ? [extra] : []).concat(notices);
+    if (!items.length) return "";
+    return '<table class="msg">' + items.map((s) =>
+      "<tr><th>お知らせ</th><td>" + esc(s) + "</td></tr>").join("") + "</table>";
+  };
 
   // ---------- コガバス(青柳・コスモス館・JR古賀駅) ----------
+  // 次に運行がある日の始発(明日以降、最大7日先まで)
+  function nextFirstKoga(today) {
+    for (let i = 1; i <= 7; i++) {
+      const d = addDays(today, i);
+      const list = data.days[d];
+      if (list && list.length) {
+        const [sec, r, h] = list[0];
+        return { label: dayLabel(d, today), time: fmt(sec), dest: data.heads[h] };
+      }
+    }
+    return null;
+  }
+
+  // その日のバスが終わったときに出す行
+  function endRow(today, cols) {
+    const f = nextFirstKoga(today);
+    const next = f ? f.label + "の始発は " + f.time + "(" + esc(f.dest) + "行)です" : "";
+    return '<tr class="endmsg"><td class="gyo txtct" colspan="' + cols + '">' +
+      '<span class="yki">本日の運行は終了しました</span><br/><span class="kiy">' + next + "</span></td></tr>";
+  }
   // 今日のダイヤと、深夜をまたぐ前日のダイヤ(25:10 など)の両方から、今より後の発車を集める
   function nextKoga(now, limit) {
     const found = [];
@@ -53,8 +107,9 @@
     }));
   }
 
-  function kogaRows(deps, count) {
-    let html = "";
+  function kogaRows(deps, count, end) {
+    let html = end || "";                     // その日のバスが終わったら、先頭に案内の行
+    if (end) count -= 1;
     deps.slice(0, count).forEach((d) => {
       html += '<tr><td class="gyo bin">' + esc(d.route) + "</td>" +
         '<td class="gyo"><span class="yki">' + esc(d.dest) + '</span><br/><span class="kiy">&#12288;</span></td>' +
@@ -66,9 +121,9 @@
     return html;
   }
 
-  function kogaList(deps, count, side) {
+  function kogaList(deps, count, side, end) {
     return '<table class="list ' + side + '"><tr><th class="i_bin">路線</th><th class="i_yk">行先</th>' +
-      '<th class="i_jkn">所定時刻 発車まで</th></tr>' + kogaRows(deps, count) + "</table>";
+      '<th class="i_jkn">所定時刻 発車まで</th></tr>' + kogaRows(deps, count, end) + "</table>";
   }
 
   function renderKoga() {
@@ -79,22 +134,28 @@
     const head = '<tr><th colspan="' + cols + '" class="header_title">' +
       '<div class="text_title"><span class="brand">コガバス</span>接近情報<br />' + esc(C.stop) + "</div>" +
       '<div class="text_time">' + now.hhmm + " 現在の状況</div></th></tr>";
+    const end = deps.length ? "" : endRow(now.date, 3);
     const body = wide
-      ? '<tr><td class="va_top">' + kogaList(deps.slice(0, perCol), perCol, "left") + "</td>" +
+      ? '<tr><td class="va_top">' + kogaList(deps.slice(0, perCol), perCol, "left", end) + "</td>" +
         '<td class="va_top">' + kogaList(deps.slice(perCol), perCol, "right") + "</td></tr>"
-      : '<tr><td class="va_top">' + kogaList(deps, perCol, "left") + "</td></tr>";
+      : '<tr><td class="va_top">' + kogaList(deps, perCol, "left", end) + "</td></tr>";
     let note = "";
     if (now.date > data.last) note = '<div class="credit">※ 時刻表データの期限が切れています。新しい時刻表に更新してください。</div>';
     board.innerHTML = '<div class="nnr t' + C.template + '" data-w="' + (wide ? 1920 : 1280) + '">' +
-      '<table class="disp">' + head + body + "</table>" + note +
+      '<table class="disp">' + head + body + "</table>" + noticeHtml() + note +
       '<div class="credit">時刻表データ出典: 古賀市「コガバス」GTFS-JP(CC BY 4.0)</div></div>';
   }
 
   // ---------- 米多比(西鉄バス → JR古賀駅 乗り継ぎ案内) ----------
+  // その日のダイヤ(土日と holidays.csv の日は土休日)
+  const diagramOf = (iso) => {
+    const wd = new Date(iso + "T00:00:00Z").getUTCDay();
+    return wd === 0 || wd === 6 || data.holidays.includes(iso) ? "土休日" : "平日";
+  };
+
   function renderYatabi() {
     const now = jstNow();
-    const holiday = now.weekday === 0 || now.weekday === 6 || data.holidays.includes(now.date);
-    const diagram = holiday ? "土休日" : "平日";
+    const diagram = diagramOf(now.date);
     const transfer = C.transfer * 60;
     const buses = data.buses.filter((b) => b[0] === diagram && b[1] >= now.sec).slice(0, 3);
     const trainTd = (dir, arr) => {
@@ -116,16 +177,22 @@
     });
     const ncol = 2 + C.directions.length;
     if (!buses.length) {
-      rows += '<tr class="first"><td class="gyo txtct" colspan="' + ncol + '"><span class="yki">本日のバスは終了しました</span></td></tr>';
+      // 次にバスがある日の始発(明日以降、最大7日先まで)
+      let next = "";
+      for (let i = 1; i <= 7 && !next; i++) {
+        const d = addDays(now.date, i);
+        const b = data.buses.find((x) => x[0] === diagramOf(d));
+        if (b) next = dayLabel(d, now.date) + "の始発は " + fmt(b[1]) + "(" + fmt(b[2]) + " " + esc(b[3] || "JR古賀駅") + "着)です";
+      }
+      rows += '<tr class="first endmsg"><td class="gyo txtct" colspan="' + ncol + '">' +
+        '<span class="yki">本日のバスは終了しました</span><br/><span class="kiy">' + next + "</span></td></tr>";
     }
     for (let i = Math.max(buses.length, 1); i < 3; i++) {
       rows += '<tr class="next pad">' + '<td class="gyo"></td>'.repeat(ncol) + "</tr>";
     }
     const ths = '<th>米多比発 発車まで</th><th>古賀駅着</th>' +
       C.directions.map((d) => "<th>JR " + esc(C.labels[d] || d) + "</th>").join("");
-    const notice = data.sample
-      ? '<table class="msg"><tr><th>お知らせ</th><td>サンプルデータを表示中です(実際の時刻ではありません)</td></tr></table>'
-      : "";
+    const notice = noticeHtml(data.sample ? "サンプルデータを表示中です(実際の時刻ではありません)" : "");
     board.innerHTML = '<div class="nnr t18 yatabi" data-w="1920"><table class="disp">' +
       '<tr><th class="header_title"><div class="text_title"><span class="brand">乗り継ぎ案内</span>' +
       esc(C.stop) + " → JR古賀駅</div>" +
@@ -146,12 +213,16 @@
     el.querySelectorAll("tr.pad").forEach((r) => { r.style.display = ""; });
     const top = el.getBoundingClientRect().top;
     let needH = 0;
-    el.querySelectorAll(".header_title, tr:not(.pad) > td.gyo, .msg").forEach((c) => {
+    el.querySelectorAll(".header_title, tr:not(.pad) > td.gyo, td .msg").forEach((c) => {
       needH = Math.max(needH, c.getBoundingClientRect().bottom - top);
     });
     if (!needH) return;
-    let creditH = 0;                                   // 出典などの行は、高さだけ別に足す
-    el.querySelectorAll(":scope > .credit").forEach((c) => { creditH += c.offsetHeight; });
+    // 表の下に付くお知らせ・出典は空の行の下にあるので、高さだけ別に足す(空の行を消すと上に詰まる)
+    let creditH = 0;
+    el.querySelectorAll(":scope > .credit, :scope > .msg").forEach((c) => {
+      const cs = getComputedStyle(c);
+      creditH += c.offsetHeight + parseFloat(cs.marginTop) + parseFloat(cs.marginBottom);
+    });
     needH += 8 + creditH;                              // 8 は表の下の枠線のぶん
     const s = Math.min(window.innerWidth / designW, window.innerHeight / needH);
     el.style.width = window.innerWidth / s + "px";     // 拡大・縮小したあとも横幅いっぱいに
@@ -257,8 +328,10 @@
       .catch(() => { if (!data) board.innerHTML = '<div class="nnr"><div class="empty">時刻表を読み込めませんでした</div></div>'; });
   }
   load();
+  loadNotices();
   setInterval(render, REFRESH_MS);
   setInterval(load, 6 * 3600 * 1000);   // 時刻表の更新(Push)を6時間ごとに取り込む
+  setInterval(loadNotices, 60 * 1000);  // お知らせは1分ごとに読み直す
   window.addEventListener("resize", fit);
   startSwitcher();
 })();

@@ -23,6 +23,20 @@ DATA_DIR = ROOT / "data"
 
 # ページのファイル名(URLの最後の部分)
 PAGE_NAMES = {"aoyagi": "aoyagi", "cosmos": "cosmos", "koga_station": "koga"}
+# お知らせ(docs/notices.txt)で使う場所の名前
+AREAS = {"yatabi": "米多比", "aoyagi": "青柳", "cosmos": "コスモス館", "koga": "古賀駅"}
+
+NOTICES_TEMPLATE = """# 発車標の画面の下に出す「お知らせ」です。GitHub のサイトでこのファイルを開き、
+# 右上の鉛筆マーク(Edit)で書き換えて「Commit changes」すると、数分で画面に出ます。
+#
+# 書き方: 1行に1つ。「場所: お知らせの文章」
+#   場所は 全部 / 米多比 / 青柳 / コスモス館 / 古賀駅(「青柳、コスモス館」のように複数も可)
+#   # で始まる行は説明なので、画面には出ません。お知らせを消すときは、その行を消します。
+#
+# 例(先頭の # を消すと画面に出ます):
+# 全部: 本日は道路工事のため、約10分遅れています
+# 青柳: 青柳四ツ角のバス停は、11月30日まで移設しています
+"""
 
 
 def koga_zip():
@@ -114,7 +128,7 @@ def main():
         (DATA / f"{name}.json").write_text(
             json.dumps(site_days(feed, site, first, last), ensure_ascii=False, separators=(",", ":")),
             encoding="utf-8")
-        conf = {"kind": "koga", "data": f"data/{name}.json", "stop": site["stop"],
+        conf = {"kind": "koga", "data": f"data/{name}.json", "stop": site["stop"], "area": AREAS[name],
                 "template": site["nnr_template"], "nnr": site["nishitetsu_url"], "sec": SWITCH_SECONDS}
         title = f'{site["place"]} 発車案内'
         (DOCS / f"{name}.html").write_text(page_html(name, title, conf), encoding="utf-8")
@@ -122,7 +136,7 @@ def main():
 
     (DATA / "yatabi.json").write_text(
         json.dumps(yatabi_data(), ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
-    conf = {"kind": "yatabi", "data": "data/yatabi.json", "stop": YATABI["stop"],
+    conf = {"kind": "yatabi", "data": "data/yatabi.json", "stop": YATABI["stop"], "area": AREAS["yatabi"],
             "transfer": YATABI["transfer_minutes"], "directions": YATABI["directions"],
             "labels": YATABI.get("direction_labels", {})}
     (DOCS / "yatabi.html").write_text(
@@ -137,6 +151,9 @@ a{{color:#fff;font-size:28px}} li{{margin:12px 0}}</style></head>
 <body><h1>コガバス発車標</h1><ul>{items}</ul></body></html>
 """, encoding="utf-8")
     (DOCS / ".nojekyll").write_text("", encoding="utf-8")   # GitHub Pages にそのまま出してもらう
+    notices = DOCS / "notices.txt"
+    if not notices.exists():                                 # 書いてあるお知らせは消さない
+        notices.write_text(NOTICES_TEMPLATE, encoding="utf-8")
     print(f"docs/ を作りました(コガバスの時刻表: {first} 〜 {last})")
 
 
