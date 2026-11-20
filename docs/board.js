@@ -48,10 +48,14 @@
   //    表示開始・終了が空なら、いつでも出す。日付の範囲外の行は出さない(期限が来たら自動で消える)。
   //  ・docs/notices.txt: 1行に「場所: 文章」。# で始まる行は説明。
   // 場所は 全部 / 米多比 / 青柳 / コスモス館 / 古賀駅(「青柳、コスモス館」のように複数も可)。
+  // 全体に出すときは「全部」「全体」「すべて」のどれでもよく、空欄も全体に出す。
+  // 「青柳郵便局」「JR古賀駅」のように正式な名前で書いても、その場所に出る。
   let notices = [];
+  const ALL_WORDS = ["全部", "全体", "すべて", "全て", "共通"];
   const forHere = (place) => {
-    const areas = String(place).split(/[,、・\s]+/).filter(Boolean);
-    return areas.includes("全部") || areas.includes(C.area);
+    const areas = String(place).split(/[,，、・\s]+/).filter(Boolean);
+    if (!areas.length) return true;
+    return areas.some((a) => ALL_WORDS.includes(a) || a.includes(C.area) || (a.length >= 2 && C.area.includes(a)));
   };
   // "2026/11/20" "2026-11-20" "2026年11月20日" などを "2026-11-20" に(時刻が付いていても日付だけ見る)
   const normDate = (s) => {
