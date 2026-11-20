@@ -53,13 +53,47 @@ def feed_period(feed):
     return to_date(min(starts)), to_date(max(ends))
 
 
+# 経由の欄に入る文字数の目安(「経由」の2文字を除く)。18 = 横長2列 / 16 = 縦長1列
+VIA_CHARS = {18: 15, 16: 22}
+
+
+def via_text(feed, trip_id, stop_ids, budget):
+    """このバス停から終点までの途中で止まるバス停を、欄に入る分だけ選んで「A・B・C」にする。
+
+    全部入らないときは、途中のバス停から間をあけて3つ→2つ→1つと減らして選ぶ。
+    """
+    seq = (feed.trip_stops or {}).get(trip_id, [])
+    pos = next((i for i, s in enumerate(seq) if s in stop_ids), None)
+    if pos is None:
+        return ""
+    names = []
+    for s in seq[pos + 1:-1]:                     # 終点は「行先」に出ているので除く
+        n = feed.stops.get(s, "")
+        if n and n not in names:
+            names.append(n)
+    if not names:
+        return ""
+    fits = lambda lst: len("・".join(lst)) <= budget
+    if fits(names):
+        return "・".join(names)
+    for k in (3, 2):
+        if k <= len(names):
+            pick = [names[round(i * (len(names) - 1) / (k - 1))] for i in range(k)]   # 間をあけて選ぶ
+            if fits(pick):
+                return "・".join(pick)
+    short = [n for n in names if len(n) <= budget]  # それでも入らなければ1つだけ
+    return min(short, key=len) if short else ""
+
+
 def site_days(feed, site, first, last):
-    """日付ごとの発車一覧。{日付: [[秒, 路線番号, 行き先番号], ...]}。
+    """日付ごとの発車一覧。{日付: [[秒, 路線番号, 行き先番号, 経由番号], ...]}。
 
     秒はその日の0時から(25:10 のような24時超えもそのまま)。ブラウザ側で前日分の24時超えも見る。
     """
     ids = stop_ids_by_name(feed, site["stop"])
-    routes, heads, days = [], [], {}
+    budget = VIA_CHARS.get(site.get("nnr_template"), 18)
+    routes, heads, vias, days = [], [], [], {}
+    via_cache = {}
 
     def index(lst, v):
         if v not in lst:
@@ -77,11 +111,14 @@ def site_days(feed, site, first, last):
                 route = feed.routes.get(trip["route_id"], "")
                 if site["routes"] and route not in site["routes"]:
                     continue
-                rows.append([sec, index(routes, route), index(heads, trip["headsign"] or route)])
+                if trip_id not in via_cache:
+                    via_cache[trip_id] = via_text(feed, trip_id, set(ids), budget)
+                rows.append([sec, index(routes, route), index(heads, trip["headsign"] or route),
+                             index(vias, via_cache[trip_id])])
         if rows:
             days[d.isoformat()] = sorted(rows)
         d += timedelta(days=1)
-    return {"routes": routes, "heads": heads, "days": days,
+    return {"routes": routes, "heads": heads, "vias": vias, "days": days,
             "first": first.isoformat(), "last": last.isoformat()}
 
 

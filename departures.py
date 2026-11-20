@@ -20,6 +20,7 @@ class Feed:
     stop_times: dict       # stop_id -> [(秒, trip_id), ...] 秒の昇順
     calendar: dict         # service_id -> {曜日: bool, start, end}
     calendar_dates: dict   # (service_id, YYYYMMDD) -> 1(追加) or 2(運休)
+    trip_stops: dict = None  # trip_id -> [stop_id, ...] 停車順(経由するバス停の表示に使う)
 
 
 def _read_csv(zf, name):
@@ -60,6 +61,10 @@ def load_feed(zip_path):
         for r in rows:
             seq = int(r.get("stop_sequence") or 0)
             last_seq[r["trip_id"]] = max(seq, last_seq.get(r["trip_id"], seq))
+        order = {}
+        for r in rows:
+            order.setdefault(r["trip_id"], []).append((int(r.get("stop_sequence") or 0), r["stop_id"]))
+        trip_stops = {t: [s for _, s in sorted(lst)] for t, lst in order.items()}
         stop_times = {}
         for r in rows:
             sec = parse_time(r.get("departure_time")) or parse_time(r.get("arrival_time"))
@@ -83,7 +88,7 @@ def load_feed(zip_path):
             (r["service_id"], r["date"]): int(r["exception_type"])
             for r in _read_csv(zf, "calendar_dates.txt")
         }
-    return Feed(stops, routes, trips, stop_times, calendar, calendar_dates)
+    return Feed(stops, routes, trips, stop_times, calendar, calendar_dates, trip_stops)
 
 
 def is_running(feed, service_id, d: date):

@@ -137,15 +137,16 @@
   // 今日のダイヤと、深夜をまたぐ前日のダイヤ(25:10 など)の両方から、今より後の発車を集める
   function nextKoga(now, limit) {
     const found = [];
-    (data.days[now.date] || []).forEach(([sec, r, h]) => {
-      if (sec >= now.sec) found.push([sec, r, h]);
+    (data.days[now.date] || []).forEach(([sec, r, h, v]) => {
+      if (sec >= now.sec) found.push([sec, r, h, v]);
     });
-    (data.days[addDays(now.date, -1)] || []).forEach(([sec, r, h]) => {
-      if (sec >= 86400 && sec - 86400 >= now.sec) found.push([sec - 86400, r, h]);
+    (data.days[addDays(now.date, -1)] || []).forEach(([sec, r, h, v]) => {
+      if (sec >= 86400 && sec - 86400 >= now.sec) found.push([sec - 86400, r, h, v]);
     });
     found.sort((a, b) => a[0] - b[0]);
-    return found.slice(0, limit).map(([sec, r, h]) => ({
+    return found.slice(0, limit).map(([sec, r, h, v]) => ({
       time: fmt(sec), route: data.routes[r], dest: data.heads[h],
+      via: (data.vias && data.vias[v]) || "",
       minutes: Math.max(0, Math.floor((sec - now.sec) / 60)),
     }));
   }
@@ -155,7 +156,8 @@
     if (end) count -= 1;
     deps.slice(0, count).forEach((d) => {
       html += '<tr><td class="gyo bin">' + esc(d.route) + "</td>" +
-        '<td class="gyo"><span class="yki">' + esc(d.dest) + '</span><br/><span class="kiy">&#12288;</span></td>' +
+        '<td class="gyo"><span class="yki">' + esc(d.dest) + '</span><br/><span class="kiy">' +
+        (d.via ? esc(d.via) + " 経由" : "&#12288;") + "</span></td>" +
         '<td class="gyo txtct"><span class="jkn">' + d.time + "</span><br/>" + nowSpan(d.minutes) + "</td></tr>";
     });
     for (let i = deps.length; i < count; i++) {

@@ -2,7 +2,8 @@
    西鉄「バスナビジョン」のテンプレート(16: 縦長1列 / 18: 横長2列)と同じ並び・大きさで、
    自分たちの画面だとわかるよう色は緑にしている(色を変えるときは --frame を書き換える)。 */
 :root { --frame: #1f9d55; --sub: #ffd54a; }
-html, body { margin: 0; padding: 0; overflow: hidden; background: var(--frame); }
+/* ページの高さ = 画面の高さ(拡大した表が、ページの元の高さで切れないように) */
+html, body { margin: 0; padding: 0; height: 100%; overflow: hidden; background: var(--frame); }
 
 .nnr, .nnr table, .nnr th, .nnr td { font-family: Helvetica, Meiryo, "MS PGothic", sans-serif; }
 .nnr { background: var(--frame); color: #fff; font-weight: bold; transform-origin: top left; }
